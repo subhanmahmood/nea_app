@@ -1,6 +1,7 @@
 import React from 'react';
 import superagent from 'superagent';
 
+//Material-UI imports
 import {Card, CardActions, CardHeader, CardTitle, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 import {red500, green500, cyan500, brown500, purple500, grey500, deepOrange500} from 'material-ui/styles/colors';
@@ -8,6 +9,7 @@ import {red500, green500, cyan500, brown500, purple500, grey500, deepOrange500} 
 class JobCard extends React.Component {
 	constructor(props){
 		super(props)
+		//Initialize component state
 		this.state = {
 			job: {
 				job_type: '',
@@ -19,9 +21,11 @@ class JobCard extends React.Component {
 				date_added: ''
 			}
 		}
+		//Bind methods to component
 		this.markAsCompleted = this.markAsCompleted.bind(this);
 	}
 	markAsCompleted(){
+		//API request to update job and status to completed
 		superagent.put(`/api/job/${this.state.job.idjob}`)
 		.set('Content-Type', 'application/json')
 		.send({status: 'Completed'})
@@ -30,6 +34,7 @@ class JobCard extends React.Component {
 				alert('ERROR: ' + error)
 			}else{
 				if(res.body.status === 200){
+					//Update job state on success
 					let updatedJob = Object.assign({}, this.state.job)
 					updatedJob.status = 'Completed'
 					this.setState({job: updatedJob});
@@ -48,6 +53,7 @@ class JobCard extends React.Component {
 				marginBottom: 20
 			}
 		}
+		//Set color of job type element
 		let jobTypeColor = cyan500;
 		switch (job.job_type.toLowerCase()) {
 			case 'conservatory':
@@ -62,6 +68,7 @@ class JobCard extends React.Component {
 			default:
 				break;
 		}
+		//Set color of job status element
 		let color = grey500;
 		if(job.status.toLowerCase() === 'ongoing'){
 			color = red500;

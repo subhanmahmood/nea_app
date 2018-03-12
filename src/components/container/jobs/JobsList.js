@@ -1,6 +1,7 @@
 import React from 'react';
 import superagent from 'superagent'
 
+//Material-UI imports
 import AddJobDialog from './AddJobDialog/AddJobDialog'
 import Card from 'material-ui/Card/Card';
 import CardActions from 'material-ui/Card/CardActions';
@@ -15,8 +16,9 @@ import MenuItem from 'material-ui/MenuItem';
 import SelectField from 'material-ui/SelectField';
 import {Table, TableHeader, TableHeaderColumn, TableBody, TableRow, TableRowColumn} from 'material-ui/Table';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
-
 import { grey500, red500, green500, cyan500, deepOrange500, brown500, purple500 } from 'material-ui/styles/colors';
+
+//User defined imports
 import JobCard from '../../presentation/jobs/JobCard'
 
 /*
@@ -33,6 +35,7 @@ details about the job.
 class JobsList extends React.Component {
 	constructor(props){
 		super(props);
+		//Initialize component state
 		this.state = {
 			jobs: [],
 			jobList: new Array(),
@@ -41,15 +44,17 @@ class JobsList extends React.Component {
 			valueJobType: 1,
 			valueJobStatus: 1
 		}
+		//Bind methods to component
 		this.addJob = this.addJob.bind(this);
 		this.onCellClick = this.onCellClick.bind(this);
 		this.handleJobTypeChange = this.handleJobTypeChange.bind(this);
-		this.handleChange = this.handleChange.bind(this)
+		this.handleSelectChange = this.handleSelectChange.bind(this)
 		this.handleJobStatusChange = this.handleJobStatusChange.bind(this);
 	}	
 	componentDidMount(){
 		const initialColumnSize = this.props.columns;
 		this.setState({value: initialColumnSize});
+		//API request to get all jobs from db with customer details
 		superagent.get('/api/job?customer=true')
 		.end((err, res) => {
 			if(err){
@@ -59,43 +64,54 @@ class JobsList extends React.Component {
 			this.setState({jobs: jobs, jobList: jobs})
 		})
 	}
-	handleChange(event, value){
-	    this.setState({
-	      value: value,
-	    });
-	}
 	handleJobTypeChange(event, value, index){
-		this.setState({valueJobType: value + 1}, this.handleChange);
+		//Update state when job type select is changed
+		this.setState({valueJobType: value + 1}, this.handleSelectChange);
 	}
 	handleJobStatusChange(event, value, index){		
-		this.setState({valueJobStatus: value + 1}, this.handleChange);
+		//Update state when status select is changed
+		this.setState({valueJobStatus: value + 1}, this.handleSelectChange);
 	}
-	handleChange(){
+	handleSelectChange(){
+		//Create arrays for job types and statuses so an API route can be built
 		const types = ['All', 'Conservatory', 'Doors/Windows', 'General'];
 		const status = ['All', 'Quote', 'Ongoing', 'Completed'];
+		//Create the base route string
 		let query = `/api/job?`
+		
 		if(this.state.valueJobStatus === 1 && this.state.valueJobType !== 1){
+			//Check if the user has selected all for status and a different value for job type
+			//Add the query for job type with the user's chosen value. e.g. '/api/job?job_type=Conservatory
 			query = query + 'job_type=' + types[this.state.valueJobType - 1] + "&"
 		}else if(this.state.valueJobStatus !== 1 && this.state.valueJobType === 1){
+			//Check if the user has selected all for job type and a different value for status
+			//Add the query for status with the user's chosen value. e.g. '/api/job?status=Ongoing
 			query = query + 'status=' + status[this.state.valueJobStatus - 1] + "&"
 		}else if(this.state.valueJobStatus !== 1 && this.state.valueJobType !== 1){
+			//Check if the user has selected a value other than 'all' for both job type and status
+			//Add the queries for status and job type with the user's chosen values .e.g. '/api/job?status=Ongoing&job_type=Conservatory'
 			query = query + `status=${status[this.state.valueJobStatus - 1]}&job_type=${types[this.state.valueJobType - 1]}&`;
 		}
+		//Add 'customer=true' so that the customer details are also returned
 		query = query + 'customer=true'
 		console.log(query)
+		//Perform the API request
 		superagent.get(query)
 		.end((err, res) => {
 			if(err){
 				alert('ERROR: ' + err)
 			}else if(res.body.status === 200){
 				const jobs = res.body.response;
+				//Update component state
 				this.setState({jobs: jobs});
 			}
 		})
 	}
 	addJob(job){
+		//Add job to component state
 		let updatedJobs = Object.assign(this.state.jobs);
 		let customer = new Array()
+		//API reques to get customer data for the job to display the customer details
 		superagent.get(`/api/customer/${job.idcustomer}`)
 		.end((err, res) => {
 			if(err){
@@ -111,6 +127,7 @@ class JobsList extends React.Component {
 		})		
 	}	
 	onCellClick(rowNumber, columnId){
+		//Take user to job page when a cell is clicked
 		const job = this.state.jobs[rowNumber]
 		window.location = `/jobs/${job.idjob}`
 	}
@@ -192,7 +209,7 @@ class JobsList extends React.Component {
 					</ToolbarGroup>
 					<ToolbarGroup>
 						<IconMenu
-							onChange={this.handleChange.bind(this)}
+							onChange={this.handleSelectChange.bind(this)}
 							iconButtonElement={
 								<IconButton touch={true} >
 									<FontIcon color='#a9a9a9' className="material-icons">view_columns</FontIcon>

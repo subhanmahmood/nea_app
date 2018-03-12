@@ -1,12 +1,12 @@
 import React from 'react';
 
+//Material-UI imports
 import FlatButton from 'material-ui/FlatButton';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
 import AppBar from 'material-ui/AppBar';
 import Badge from 'material-ui/Badge';
-
 import {blue500} from 'material-ui/styles/colors';
 
 /*
@@ -27,8 +27,9 @@ that the user can access are:
 class Navbar extends React.Component {
 	constructor(props){
 		super(props);
+		//Initialize component state with array of link names and links
 		this.state = {
-		     list: [
+		  list: [
 				{
 					linkName: 'Dashboard',
 					link: '/'
@@ -56,13 +57,16 @@ class Navbar extends React.Component {
 			],
 			open: false
 		}
+		//Bind methods to component
 		this.handleDrawerClose = this.handleDrawerClose.bind(this);
 		this.handleDrawerToggle = this.handleDrawerToggle.bind(this);
 	}
 	handleDrawerToggle(){
+		//Open side drawer
 		this.setState({open: !this.state.open})
 	}	
 	handleDrawerClose(){
+		//Close side drawer
 		this.setState({open: false})
 	}
 	render(){
@@ -71,15 +75,17 @@ class Navbar extends React.Component {
 				color: 'white'
 			}
 		}
+		//Iterate over state to get array of links for the navbar
 		const navItems = 
-			<div className="hide-on-small-only">{
-				this.state.list.map((link, i) => {
-					return(				
-							<FlatButton key={i} label={link.linkName} href={link.link} style={styles.button} />
-						
-					)
-				})
-			}</div> 
+		<div className="hide-on-small-only">
+		{
+			this.state.list.map((link, i) => {
+				return(				
+					<FlatButton key={i} label={link.linkName} href={link.link} style={styles.button} />
+				)
+			})
+		}
+		</div> 
 		const MenuItems = this.state.list.map((link, i) => {
 			return(
 				<a href={link.link} key={i} style={{textDecoration: 'none'}}>

@@ -1,12 +1,14 @@
 import React from 'react';
 import superagent from 'superagent';
 
+//Material-UI Imports
 import {Card, CardTitle, CardText, CardHeader} from 'material-ui/Card';
 import {cyan500, grey500, grey300} from 'material-ui/styles/colors';
 import Divider from 'material-ui/Divider';
 import RaisedButton from 'material-ui/RaisedButton';
 import radio from 'material-ui/svg-icons/av/radio';
 
+//User defined imports
 import AddAppointment from './AddAppointment';
 import helpers from '../../../helpers/helpers';
 import { Grid, Row, Col } from 'react-flexbox-grid';
@@ -14,25 +16,31 @@ import { Grid, Row, Col } from 'react-flexbox-grid';
 class AppointmentCard extends React.Component{
     constructor(props){
         super(props)
+        //Intialize component state
         this.state = {
             color: ''
         }
+        //Bind methods to component
         this.deleteAppointment = this.deleteAppointment.bind(this);
     }
     deleteAppointment(){
+        //Perform API request to delete appointment
         superagent.delete(`/api/appointment/${this.props.appointment.idappointment}`)
         .end((err, res) => {
             if(err){
                 alert('ERROR: ' + err)
             }
             if(res.body.status === 200){
+                //Call method to delete appointment from state of parent component
                 this.props.deleteAppointment(this.props.appointment);
             }
         })
     }
     render(){
+        //Get current date
         const date = helpers.date();
         let color = ''
+        //Check if appointment is in the past and set color accordingly
         if(this.props.appointment.date < date){
             color = grey500
         }else {
@@ -88,6 +96,7 @@ displaying the appointment date and the customer
 and job details.
 */
 
+//Component to be rendered if there are no appointments
 class NoAppointments extends React.Component {
     render(){
         return(
@@ -101,45 +110,55 @@ class NoAppointments extends React.Component {
 class AppointmentList extends React.Component{
     constructor(props){
         super(props)
+        //Initialize component state
         this.state = {   
             appointments: new Array(),
             currentAppointments: new Array(),
             pastAppointments: new Array(),
             futureAppointments: new Array()
         }
+        //Bind methods to component
         this.sortAppointments = this.sortAppointments.bind(this);
         this.updateAppointments = this.updateAppointments.bind(this);
         this.addAppointment = this.addAppointment.bind(this);
         this.getAppointments = this.getAppointments.bind(this);
         this.deleteAppointment = this.deleteAppointment.bind(this);
     }
-    componentDidMount(){// [ 1, 2, 2, 3, 3, 3, 5, 6, 7, 8 ]
+    componentDidMount(){
+        //call getAppointments()
         this.getAppointments()
     }
     getAppointments(){
+        //API request to get appointments with customer details
         superagent.get('/api/appointment?customer=true')
         .end((err, res) => {
             if(err){
                 alert('ERROR: ' + err)
             }
+            //Add appoitnments to component state
             const appointments = res.body.response;
             this.setState({appointments: appointments});
             this.updateAppointments();
         })
     }
-    updateAppointments(){        
+    updateAppointments(){    
+        //This method sorts appointments into three sections.    
         this.sortAppointments('appointments', this.state.appointments, 'asc', ['date', 'time'])
+        //get current date
         const date = helpers.date();
+        //Filter appointments where the date does not equal the current date
         const currentAppointments = this.state.appointments.filter((apt) => {
             return apt.date === date
         });
+        //Filter appointments where the date is less than the current date
         const pastAppointments = this.state.appointments.filter((apt) => {
-            const sd = apt.date;
             return apt.date < date;
         });
+        //Filter appointments where the date is greater than the current date
         const futureAppointments = this.state.appointments.filter((apt) => {
             return apt.date > date;
         })
+        //Add arrays to state
         this.setState({currentAppointments: currentAppointments});
         this.setState({futureAppointments: futureAppointments});
         this.setState({pastAppointments: pastAppointments});
@@ -147,25 +166,29 @@ class AppointmentList extends React.Component{
 
     }
     sortAppointments(name, arr, type, options){
+        //Use merge-sort to sort appointments in 
         const newArr = helpers.mergeSort(arr, type, options);
         let updatedState = Object.assign({}, this.state)
         updatedState[name] = newArr;
         this.setState(updatedState);
     }
     addAppointment(apt){
+        //Push appointment to the updatedAppointments array.
         let updatedAppointments = Object.assign([], this.state.appointments);
         updatedAppointments.push(apt);
+        //Update state and execute updateAppointments when state has been set
         this.setState({appointments: updatedAppointments}, this.updateAppointments);
     }
     deleteAppointment(apt){
-        let updateAppointments = this.state.appointments.filter((appt) => {
+        //Remove appointment from array by returning values that are not equal to the appointment id
+        let updatedAppointments = this.state.appointments.filter((appt) => {
             return (apt.idappointment !== appt.idappointment)
         });
-        this.setState({appointments: updateAppointments}, this.updateAppointments)
+        this.setState({appointments: updatedAppointments}, this.updateAppointments)
         
     }
     render(){
-        
+        //Create arrays of cards for each appointment array using .map()
         const CurrentAppointments = this.state.currentAppointments.map((apt, i) => {
             return(
                 <AppointmentCard appointment={apt} key={i} deleteAppointment={this.deleteAppointment} />

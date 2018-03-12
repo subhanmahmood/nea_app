@@ -9,7 +9,7 @@ class Finances extends React.Component {
 	}
 	render(){
 		return(
-            <div className="container" style={{marginTop: 20}}>
+      <div className="container" style={{marginTop: 20}}>
 				<h1 style={{fontWeight: 200}}>Finances</h1>
 				<FinanceTable/>
 			</div>

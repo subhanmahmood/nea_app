@@ -1,13 +1,8 @@
 import React from 'react';
 import superagent from 'superagent';
-import {
-	Table,
-	TableHeader,
-	TableHeaderColumn,
-	TableBody,
-	TableRow,
-	TableRowColumn
-} from 'material-ui/Table';
+
+//Material-UI imports
+import {Table,TableHeader,TableHeaderColumn,TableBody,TableRow,TableRowColumn} from 'material-ui/Table';
 import JobCard from '../../presentation/jobs/JobCard';
 import CustomerCard from '../../presentation/customers/CustomerCard';
 import JobPartTable from '../../container/jobs/AddJobDialog/Table/JobPartTable';
@@ -17,21 +12,26 @@ import FontIcon from 'material-ui/FontIcon';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import Paper from 'material-ui/Paper';
 
+//User defined inputs
 import helpers from '../../../helpers/helpers';
 
 class Invoice extends React.Component {
 	constructor(props){
 		super(props);
+		//Initialize component state
 		this.state = {
 			job: new Array(),
 			jobParts: new Array(),
 			parts: new Array()	
 		}
+		//Bind methods to component state
 		this.print = this.print.bind(this);
 		this.calculateTotalCost = this.calculateTotalCost.bind(this);
 	}
 	componentDidMount(){
+		//Get job id from HTML
 		const id = document.getElementById('id').innerHTML;
+		//API request to get job data
 		superagent.get(`/api/job/${id}`)
 		.end((err, res) => {
 			if(err){
@@ -41,7 +41,7 @@ class Invoice extends React.Component {
 			console.log(job)
 			this.setState({job: job});
 		})
-
+		//API request to get jobParts for the job
 		superagent.get(`/api/jobitem/${id}`)
 		.end((err, res) => {
 			if(err){
@@ -52,19 +52,25 @@ class Invoice extends React.Component {
 		});
 	}
 	print(){
+		//Store invoice HTML in divElem
 		const divElem = document.getElementById("invoice").innerHTML;
+		//Store entire page HTML in old
 		const old = document.body.innerHTML;
+		//Set page HTML to only contain invoice HTML
 		document.body.innerHTML = "<html><head><title></title></head><body>" + 
 		divElem + "</body>";
-
+		//Open print dialog
 		window.print();
+		//Set page HTML to original value
 		document.body.innerHTML = old;
 	}
 	calculateTotalCost(array, n){
+		//Set value of n to 0 if it has not been defined
 		n |= 0;
 		if(n === array.length){
 			return 0;
 		} else {
+			//Calculate total cost
 			return (array[n].cost_per_unit * array[n].quantity) + this.calculateTotalCost(array, n + 1);
 		}
 	}

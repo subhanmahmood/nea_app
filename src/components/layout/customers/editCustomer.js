@@ -1,7 +1,7 @@
 import React from 'react';
 import superagent from 'superagent';
 
-
+//Material-UI imports
 import Dialog from 'material-ui/Dialog';
 import {Card, CardActions, CardHeader, CardTitle, CardText} from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
@@ -9,12 +9,12 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton'
 import CustomerCard from '../../presentation/customers/CustomerCard';
 import {Grid, Row, Col} from 'react-flexbox-grid'
-
 import {red500} from 'material-ui/styles/colors';
 
 class EditCustomer extends React.Component {
 	constructor(props){
 		super(props);
+		//Initialize component state
 		this.state = {
 			customer: {},
 			default: {
@@ -22,13 +22,16 @@ class EditCustomer extends React.Component {
 			},
 			open:false
 		}
+		//Bind methods to component
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.deleteCustomer = this.deleteCustomer.bind(this);
 		this.handleClose = this.handleClose.bind(this);
 		this.handleOpen = this.handleOpen.bind(this);
 	}
 	componentDidMount(){
+		//Get id of customer from HTML
 		const id = document.getElementById("id").innerHTML;
+		//Build route and perforn API reques to get customer data
 		const routeQuery = '/api/customer/' + id;
 		superagent.get(routeQuery)
 		.end((err, res) => {
@@ -40,12 +43,15 @@ class EditCustomer extends React.Component {
 		})
 	}
 	handleOpen(){
+		//Open dialog
 		this.setState({open: true})
 	}
 	handleClose(){
+		//Close dialog
 		this.setState({open: false})
 	}
 	handleChange(event){
+		//Update component state when TextField is changed
 		const name = event.target.name;
 		const value = event.target.value;
 		let updatedCustomer = Object.assign({}, this.state.customer);
@@ -53,8 +59,10 @@ class EditCustomer extends React.Component {
 		this.setState({customer: updatedCustomer});
 	}
 	handleSubmit(event){
+		//Prevent default action when form is submitted
 		event.preventDefault();
 		const customer = this.state.customer;
+		//Perform API request to update customer details
 		superagent.put(`/api/customer/${this.state.customer.idcustomer}`)
 		.set('Content-Type', 'application/json')
 		.send(customer)
@@ -63,11 +71,13 @@ class EditCustomer extends React.Component {
 				alert('ERROR: ' + err)
 			}
 			if(res.body.status === 200)[
+				//Take user to customer page if successsful
 				window.location = '/customers'
 			]
 		})
 	}
 	deleteCustomer(){
+		//Perform API request to delete customer from db.
 		superagent.delete(`/api/customer/${this.state.customer.idcustomer}`)
 		.end((err, res) => {
 			if(err){
@@ -127,7 +137,7 @@ class EditCustomer extends React.Component {
 						<Grid>
 						<Row>
 							<Col xs={12} sm={12} md={12} lg={12}>
-								<h1 style={{fontWeight: 200, marginTop: 10, marginBottom: 0}}>Edit Job</h1>
+								<h1 style={{fontWeight: 200, marginTop: 10, marginBottom: 0}}>Edit Customer</h1>
 							</Col>
 						</Row>
 						<Row>

@@ -9,13 +9,16 @@ import styles from './styles';
 class PartSelect extends React.Component {
     constructor(props){
         super(props);
+        //Initialize component state
         this.state = {
             value: 1,
             parts: []
         }
+        //Bind methods to component
         this.handleChange = this.handleChange.bind(this);
     }
     componentDidMount(){
+        //API request to get parts from db and add them to state
         superagent.get('/api/part')
         .end((err, res) => {
             if(err){
@@ -26,6 +29,7 @@ class PartSelect extends React.Component {
         });
     }
     handleChange(event, index, value){
+        //Set value when SelectField is changed
         this.setState({value: value});
     }
     render(){

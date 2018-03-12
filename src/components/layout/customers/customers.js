@@ -1,10 +1,4 @@
 import React from 'react';
-import superagent from 'superagent';
-
-import {Card, CardActions, CardHeader, CardTitle, CardText} from 'material-ui/Card';
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
-
 import CustomersTable from '../../container/customer/CustomerTable';
 import CustomerList from '../../container/customer/CustomerList';
 

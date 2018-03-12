@@ -1,13 +1,18 @@
 import React from 'react';
 import superagent from 'superagent';
 
+//Material-UI imports
 import PartSelect from '../Select/PartSelect';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 
+//User defined imports 
+import helpers from '../../../../../helpers/helpers';
+
 class AddJobPart extends React.Component {
     constructor(props){
         super(props);
+        //Initialize component state
         this.state = {
             value: 1,
             parts: new Array({}),
@@ -17,12 +22,13 @@ class AddJobPart extends React.Component {
                 quantity: 0
             }
         }
+        //Bind methods to component
         this.handlePartSelectChange = this.handlePartSelectChange.bind(this);
         this.handleQuantityChange = this.handleQuantityChange.bind(this);
-        this.handleQuantityKeyDown = this.handleQuantityKeyDown.bind(this);
         this.addJobPart = this.addJobPart.bind(this);
     }
     componentDidMount(){
+        //API request to get all parts from server
         superagent.get('/api/part')
         .end((err, res) => {
             if(err){
@@ -30,43 +36,31 @@ class AddJobPart extends React.Component {
             }
             const parts = res.body.response;
             this.setState({parts: parts});
-            
+            //Get id of first part in array or default to 0 if value is undefined
             const idpart = parts[0].idpart || 0;
             let updatedJobPart = Object.assign({}, this.state.jobPart);
             updatedJobPart.idpart = idpart;
+            //Set state
             this.setState({jobPart: updatedJobPart});
         });
-
-        superagent.get('/api/job')
-        .end((err, res) => {
-            if(err){
-                alert('ERROR: ' + err);
-            }
-            const data = res.body.response;
-            if(data[0] === undefined){
-                
-            }
-        })
     }
     handlePartSelectChange(event, index, value){
+        //Get idpart when select is changed and update state
         const idpart = this.state.parts[index].idpart;
         let updatedJobPart = Object.assign({}, this.state.jobPart);
         updatedJobPart.idpart = idpart;
         this.setState({value: value, jobPart: updatedJobPart});
     }
     handleQuantityChange(event){
+        //Update value of quantity when quantity TextField is changed
         const value = event.target.value;
         let updatedJobPart = Object.assign({}, this.state.jobPart);
         updatedJobPart.quantity = value;
         this.setState({jobPart: updatedJobPart});
     }
-    handleQuantityKeyDown(e){
-        if(e.keyCode === 13){
-            this.addJobPart;
-        }
-    }
     addJobPart(){
         const idpart = this.state.parts[0].idpart;
+        //Reset component state
         this.setState({
             value: 1,
             jobPart: {
@@ -75,6 +69,7 @@ class AddJobPart extends React.Component {
                 quantity: 0
             }
         });
+        //Add jobPart to parent component's state
         this.props.add(this.state.jobPart);
     }
     render(){
@@ -90,7 +85,6 @@ class AddJobPart extends React.Component {
                         style={{paddingTop: 25, width: '100%'}} 
                         type="number" 
                         onChange={this.handleQuantityChange}
-                        onKeyDown={this.handleQuantityKeyDown}
                         value={this.state.jobPart.quantity}/>
                 </div>
                 <div className="col s12 m3">

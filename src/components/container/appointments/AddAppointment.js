@@ -1,6 +1,7 @@
 import React from 'react';
 import superagent from 'superagent';
 
+//Material UI Imports
 import ContentAdd from 'material-ui/svg-icons/content/add';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
@@ -22,9 +23,10 @@ date and time. This will then be added to
 the MySQL database
 */
 
-class AddAppointment extends React.Component{
+class AddAppointment extends React.Component{	
 	constructor(props){
 		super(props)
+		//constructor initialises component state
 		this.state = {
 			value: 1,
 			open: false,
@@ -38,6 +40,7 @@ class AddAppointment extends React.Component{
 				idcustomer: ''
 			}
 		}
+		//binding methods to component
 		this.handleClose = this.handleClose.bind(this);
 		this.handleOpen = this.handleOpen.bind(this);
 		this.closeSnackbar = this.closeSnackbar.bind(this);
@@ -48,6 +51,7 @@ class AddAppointment extends React.Component{
 		this.handleCustomerChange = this.handleCustomerChange.bind(this);
 	}
 	componentDidMount(){
+		//get customers from db
 		superagent.get('/api/customer')
 		.end((err, res) => {
 			if(err){
@@ -58,22 +62,26 @@ class AddAppointment extends React.Component{
 		})
 	}
 	handleCustomerChange(event, index, value){
+		//update state when input value changes
 		const idcustomer = this.state.customers[index].idcustomer;
-		console.log(idcustomer)
 		let updatedAppointment = Object.assign({}, this.state.appointment);
 		updatedAppointment.idcustomer = idcustomer;
 		this.setState({appointment: updatedAppointment, value: value});
 	}
 	handleClose(){
+		//close dialog
 		this.setState({open: false});
 	}
 	openSnackbar(){
+		//open snackbar
 		this.setState({snackbarOpen: true});
 	}
 	closeSnackbar(){
+		//close snackbar
 		this.setState({snackbarOpen: false});
 	}
 	handleOpen(){
+		//open dialog and get appointments from db so that data is upto date
 		superagent.get('/api/appointment')
 		.end((err, res) => {
 			if(err){
@@ -86,11 +94,14 @@ class AddAppointment extends React.Component{
 		this.setState({open: true})
 	}
 	handleClose(){
+		//close dialog
 		this.setState({open: false})
 	}
 	handleDateChange(a, date){
+		//convert date from JS format to yyyy-mm-dd and update state
 		let d = date.getDate();
 		let m = date.getMonth();
+		//if statement makes sure that single digits have a 0 before them e.g. 01, 02, 03
 		if(d < 10){
 			d = ('0' + d).slice(-2)
 		}
@@ -103,8 +114,10 @@ class AddAppointment extends React.Component{
 		this.setState({appointment: updatedAppointment});
 	}
 	handleTimeChange(a, time){
+		//update component state when TimePicker value changes
 		let h = time.getHours();
 		let m = time.getMinutes();
+		//if statement makes sure that single digits have a 0 before them e.g. 01, 02, 03
 		if(h < 10){
 			h = ('0' + h).slice(-2)
 		}
@@ -117,20 +130,19 @@ class AddAppointment extends React.Component{
 		this.setState({appointment: updatedAppointment});
 	}
 	handleSubmit(){
+		//submit data to server
 		let date = helpers.date()
 		let clashExists = false;
 		const appointment = this.state.appointment;
 		const appointments = this.state.appointments;
-		console.log(appointments)
+		//check that there are no clashes
 		for(let i = 0; i < appointments.length; i++){
-			console.log(appointments[i].time === appointment.time)
-			console.log(appointments[i].date >= appointment.date)
 			if(appointment.time === appointments[i].time && appointments[i].date >= appointment.date){
 				clashExists = true
 			}
 		}
 		if(!clashExists){
-			console.log("No Clash0")
+			//perform API request if there is no clash
 			superagent.post('/api/appointment')
 			.set('Content-Type', 'application/json')
 			.send(this.state.appointment)

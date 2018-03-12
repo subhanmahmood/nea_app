@@ -1,3 +1,4 @@
+//Import express and controllers
 var express = require( 'express' )
 var router = express.Router( )
 var controllers = require('../controllers');
@@ -11,6 +12,8 @@ the relevant MySQL query and if applicable, sending
 the returned data as JSON to the client.
 */
 
+//Each function gets the apporopriate controller and
+//executes the method depending on the HTTP method
 router.get( '/:resource', function( req, res, next ) {
   var resource = req.params.resource;
   var controller = controllers[resource];
@@ -27,6 +30,11 @@ router.put( '/:resource/:id', function( req, res, next ) {
   var resource = req.params.resource
   var controller = controllers[resource];
   controller.findAndUpdateById(req, res);
+})
+
+router.post('/moodle', function(req, res){
+  console.log(req.body)
+  res.send(["gonk"])
 })
 
 router.post( '/:resource', function( req, res, next ) {

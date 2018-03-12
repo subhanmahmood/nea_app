@@ -1,6 +1,7 @@
 import React from 'react';
 import superagent from 'superagent';
 
+//Material-UI imports
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
@@ -10,10 +11,14 @@ import Snackbar from 'material-ui/Snackbar';
 import TextField from 'material-ui/TextField';
 var faker = require('faker')
 
+//User defined imports
 import validationHelpers from '../../../helpers/validationHelpers';
 
+//Array of validation. Each item is a function which validates a TextField
+/*Each function has an array of errors containing criteria that input must 
+fulfill and returns true if all the errors are true*/
 const validationMethods = {
-first_name: function(value){
+	first_name: function(value){
 		let errors = new Array();
 		errors = {
 			presenceCheck: validationHelpers.presenceCheck(value),
@@ -29,8 +34,7 @@ first_name: function(value){
 		}
 		return validationHelpers.checkAllTrue(errors)
 	},
-	address_line_1: function(value){
-		
+	address_line_1: function(value){		
 		let errors = new Array();
 		errors = {
 			presenceCheck: validationHelpers.presenceCheck(value),
@@ -103,6 +107,7 @@ be inserted into the MySQL database.
 class AddCustomerDialog extends React.Component {
 	constructor(props){
 		super(props);
+		//Initialize state
 		this.state = {
 			open: false,
 			snackbarOpen: false,
@@ -112,47 +117,59 @@ class AddCustomerDialog extends React.Component {
 				first_name: false,
 				last_name: false,
 				address_line_1: false,
-				address_line_2: false,
-				address_line_3: false,
+				address_line_2: true,
+				address_line_3: true,
 				postcode: false,
 				phone_number: false,
 				email: false
 			}
 		}
+		//Bind methods to component
 		this.handleChange = this.handleChange.bind(this);
 		this.handleClose = this.handleClose.bind(this)
 		this.generateCustomers = this.generateCustomers.bind(this);
 	}
 	handleOpenSnackbar(){
+		//Open snackbar
 		this.setState({snackbarOpen: true});
 	}
 	handleOpen(){
+		//Open dialog
 		this.setState({open: true})
 	}
 	handleClose(){
+		//Close dialog
 		this.setState({open: false})
 	}
 	handleRequestClose() {
+		//Close snackbar
 		this.setState({snackbarOpen: false});
 	}
 	handleChange(event){
+		//Get name and value of TextField
 		const name = event.target.name;
 		const value = event.target.value;
 
+		//Get correct validation function from validationMethods
 		let validation = validationMethods[name];
-		const error = !validation(value.toLowerCase())
+		//Get value of error and update state
+		const error = validation(value.toLowerCase())
 		let updatedErrors = Object.assign({}, this.state.errors);
 		updatedErrors[name] = error;
 		this.setState({errors: updatedErrors})
-
+		//Update customer in state
 		let updatedCustomer = Object.assign({}, this.state.customer);
 		updatedCustomer[name] = value;
 		this.setState({customer: updatedCustomer});
 	}
 	handleSubmit(event){
+		//Prevent default action on form submit
 		event.preventDefault();
 		var data = this.state.customer;
+		/*Check that there are no errors by checking that all values in 
+		errors array are true*/
 		if(validationHelpers.checkAllTrue(this.state.errors)){
+			//Send data to server via API request
 			superagent.post('/api/customer')
 			.set('Content-Type', 'application/json')
 			.send(this.state.customer)
@@ -161,12 +178,16 @@ class AddCustomerDialog extends React.Component {
 					alert('ERROR: ' + err)
 				}
 				if(res.body.status === 200){
-					this.handleClose;
+					//Update parent component's state on success
+					this.props.updateList(data)
+					//Close dialog
+					this.handleClose();
 				}
 			})
 		}
 	}
 	generateCustomers(){
+		//Generate customer details using faker package
 		const customer = {
 			first_name: faker.name.firstName(),
 			last_name: faker.name.lastName(),
@@ -177,6 +198,7 @@ class AddCustomerDialog extends React.Component {
 			phone_number: faker.phone.phoneNumber(),
 			email: faker.internet.email()
 		}
+		//Send data to server via API request
 		superagent.post('/api/customer')
 		.set('Content-Type', 'application/json')
 		.send(customer)
@@ -184,14 +206,15 @@ class AddCustomerDialog extends React.Component {
 			if(err){
 				alert('ERROR: ' + err)
 			}
-			if(res.body.status = 200){
-				this.props.updateList(customer);
+			console.log(res.body)
+			if(res.body.status === 200){
+				console.log(res.body.response)
+				this.props.updateList(customer, res.body.response.insertId);
 				this.handleClose()
 			}
 		})
 	}
 	render(){
-		console.log(validationHelpers.checkAllTrue(this.state.errors))
 		const errors = this.state.errors;
 		const actions = [
 			<FlatButton 
@@ -233,7 +256,6 @@ class AddCustomerDialog extends React.Component {
 			}
 		}
 		return(
-
 			<div>
 				<Snackbar
 					open={this.state.snackbarOpen}
@@ -253,47 +275,47 @@ class AddCustomerDialog extends React.Component {
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.first_name ? 'Make sure this field is not empty, and does not contain any special characters or numbers' : ''} 
+							errorText={!errors.first_name ? 'Make sure this field is not empty, and does not contain any special characters or numbers' : ''} 
 							hintText="First name" 
 							name="first_name"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.last_name ? 'Make sure this field is not empty, and does not contain any special characters or numbers' : ''} 
+							errorText={!errors.last_name ? 'Make sure this field is not empty, and does not contain any special characters or numbers' : ''} 
 							hintText="Last name" 
 							name="last_name"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.address_line_1 ? 'Make sure this field is not empty and does not contain any special characters' : ''} 
+							errorText={!errors.address_line_1 ? 'Make sure this field is not empty and does not contain any special characters' : ''} 
 							hintText="Address Line 1" 
 							name="address_line_1"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.address_line_2 ? 'Make sure this field is not empty and does not contain any special characters' : ''} 
+							errorText={!errors.address_line_2 ? 'Make sure this field is not empty and does not contain any special characters' : ''} 
 							hintText="Address Line 2" 
 							name="address_line_2"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.address_line_3 ? 'Make sure this field is not empty and does not contain any special characters' : ''} 
+							errorText={!errors.address_line_3 ? 'Make sure this field is not empty and does not contain any special characters' : ''} 
 							hintText="Address Line 3" 
 							name="address_line_3"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.postcode ? 'Make sure that this field is not empty, only contains letters and is between 5 and 7 characters' : ''} 
+							errorText={!errors.postcode ? 'Make sure that this field is not empty, only contains letters and is between 5 and 7 characters' : ''} 
 							hintText="Postcode" name="postcode"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.phone_number ? 'Make sure that this field is not empty, only contains numbers and is exactly 10 characters long' : ''} 
+							errorText={!errors.phone_number ? 'Make sure that this field is not empty, only contains numbers and is exactly 10 characters long' : ''} 
 							hintText="Phone number" name="phone_number"/>
 						<TextField 
 							onChange={this.handleChange} 
 							style={styles.input} 
-							errorText={errors.email ? 'Make sure this field is not empty and your email is in the correct format' : ''} 
+							errorText={!errors.email ? 'Make sure this field is not empty and your email is in the correct format' : ''} 
 							hintText="Email" name="email"/>
 						<div style={{ textAlign: 'right', padding: 8, margin: '24px -24px -24px -24px' }}>
 							{actions}

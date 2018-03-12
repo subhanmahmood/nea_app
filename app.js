@@ -1,3 +1,4 @@
+//Imports 
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -13,9 +14,11 @@ var bodyParser = require('body-parser');
 
 var router = express.Router( )
 
+//Import route files
 var index = require('./routes/index');
 var api = require('./routes/api');
 
+//Import mysql drivers and connection
 var mysql = require('mysql');
 var connection = require('./database');
 // view engine setup

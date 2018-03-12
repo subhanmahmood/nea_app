@@ -1,6 +1,5 @@
 import React from 'react';
 
-import PartsTable from '../../container/parts/PartsTable'
 import PartList from '../../container/parts/PartList';
 
 class Parts extends React.Component {
